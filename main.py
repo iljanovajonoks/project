@@ -61,6 +61,17 @@ for row in portfolio:
     current_price.append(float(temp))
     print(current_price)
 
+    time.sleep(1)
+    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.fwNMDM')))
+
+    if "(1d)" in find.text:
+        print(f'-{find.text}')
+    else:
+        find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
+        print(f'+{find.text}')
+
+
+
 df['Current Price, $'] = current_price
 df.to_excel(file_path, index=False)
 
@@ -74,7 +85,7 @@ print(profit_loss)
 df['Profit / Loss, %'] = profit_loss
 df.to_excel(file_path, index=False)
 
-# Pašreizējais investīciju apjoma aprēķināšana un ierakstīšana excel failā.
+# Pašreizējais investīciju apjoms.
 current_invest_amount = []
 for row in portfolio:
     temp = (row[2] * row[5])
