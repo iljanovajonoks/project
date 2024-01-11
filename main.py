@@ -34,6 +34,7 @@ df['Invested amount, $'] = invested_amount
 df.to_excel(file_path, index=False)
 
 current_price = []
+one_day = []
 
 for row in portfolio:
 
@@ -61,15 +62,15 @@ for row in portfolio:
     current_price.append(float(temp))
     print(current_price)
 
+    # Paņemu cenas izmaiņu par 1 dienu.
     time.sleep(1)
     find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.fwNMDM')))
 
     if "(1d)" in find.text:
-        print(f'-{find.text}')
+        one_day.append(f'-{find.text}'.replace(" (1d)", ""))
     else:
         find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
-        print(f'+{find.text}')
-
+        one_day.append(f'+{find.text}'.replace(" (1d)", ""))
 
 
 df['Current Price, $'] = current_price
@@ -93,6 +94,9 @@ for row in portfolio:
 print(current_invest_amount)
 
 df['Current Invested Amount, $'] = current_invest_amount
+df.to_excel(file_path, index=False)
+
+df['Price Change in 1 Day'] = one_day
 df.to_excel(file_path, index=False)
 
 driver.quit()
