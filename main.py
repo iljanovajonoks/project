@@ -20,7 +20,7 @@ find = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, 
 find.click()
 
 # Excel atveršana ar portfeļa datiem
-file_path = "portfolio2.xlsx"
+file_path = "portfolio.xlsx"
 df = pandas.read_excel(file_path)
 portfolio = df.values.tolist()
 
@@ -35,6 +35,7 @@ df.to_excel(file_path, index=False)
 
 current_price = []
 one_day = []
+seven_days = []
 
 for row in portfolio:
 
@@ -72,6 +73,18 @@ for row in portfolio:
         find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
         one_day.append(f'+{find.text}'.replace(" (1d)", ""))
 
+    # Paņemu cenas izmaiņu par 7 dienas.
+    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.ID, 'react-tabs-16')))
+    find.click()
+
+    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.fwNMDM')))
+
+    if "(7d)" in find.text:
+        seven_days.append(f'-{find.text}'.replace(" (7d)", ""))
+    else:
+        find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
+        seven_days.append(f'+{find.text}'.replace(" (7d)", ""))
+    print(seven_days)
 
 df['Current Price, $'] = current_price
 df.to_excel(file_path, index=False)
@@ -97,6 +110,9 @@ df['Current Invested Amount, $'] = current_invest_amount
 df.to_excel(file_path, index=False)
 
 df['Price Change in 1 Day'] = one_day
+df.to_excel(file_path, index=False)
+
+df['Price Change in 7 Days'] = seven_days
 df.to_excel(file_path, index=False)
 
 driver.quit()
