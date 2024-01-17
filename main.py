@@ -20,7 +20,7 @@ find = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, 
 find.click()
 
 # Excel atveršana ar portfeļa datiem
-file_path = "portfolio.xlsx"
+file_path = "portfolio2.xlsx"
 df = pandas.read_excel(file_path)
 portfolio = df.values.tolist()
 
@@ -36,6 +36,7 @@ df.to_excel(file_path, index=False)
 current_price = []
 one_day = []
 seven_days = []
+one_month = []
 
 for row in portfolio:
 
@@ -61,7 +62,6 @@ for row in portfolio:
         EC.visibility_of_element_located((By.CLASS_NAME, "sc-f70bb44c-0.jxpCgO.base-text")))
     temp = find.text.replace("$", "").replace(",", "")
     current_price.append(float(temp))
-    print(current_price)
 
     # Paņemu cenas izmaiņu par 1 dienu.
     time.sleep(1)
@@ -74,9 +74,12 @@ for row in portfolio:
         one_day.append(f'+{find.text}'.replace(" (1d)", ""))
 
     # Paņemu cenas izmaiņu par 7 dienas.
-    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.ID, 'react-tabs-16')))
-    find.click()
+    li_element = WebDriverWait(driver, 1).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, '.react-tabs__tab-list li:nth-child(2)'))
+    )
 
+    li_element.click()
+    time.sleep(1)
     find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.fwNMDM')))
 
     if "(7d)" in find.text:
@@ -84,7 +87,21 @@ for row in portfolio:
     else:
         find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
         seven_days.append(f'+{find.text}'.replace(" (7d)", ""))
-    print(seven_days)
+
+    # Paņemu cenas izmaiņu par 1 menesi.
+    li_element = WebDriverWait(driver, 1).until(
+        EC.visibility_of_element_located((By.CSS_SELECTOR, '.react-tabs__tab-list li:nth-child(3)'))
+    )
+
+    li_element.click()
+    time.sleep(1)
+    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.fwNMDM')))
+
+    if "(1mo)" in find.text:
+        one_month.append(f'-{find.text}'.replace(" (1mo)", ""))
+    else:
+        find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
+        one_month.append(f'+{find.text}'.replace(" (1mo)", ""))
 
 df['Current Price, $'] = current_price
 df.to_excel(file_path, index=False)
@@ -94,7 +111,6 @@ profit_loss = []
 for row in portfolio:
     temp = ((row[5] - row[3]) / row[3]) * 100
     profit_loss.append(round(temp, 2))
-print(profit_loss)
 
 df['Profit / Loss, %'] = profit_loss
 df.to_excel(file_path, index=False)
@@ -104,7 +120,6 @@ current_invest_amount = []
 for row in portfolio:
     temp = (row[2] * row[5])
     current_invest_amount.append(round(temp, 2))
-print(current_invest_amount)
 
 df['Current Invested Amount, $'] = current_invest_amount
 df.to_excel(file_path, index=False)
@@ -113,6 +128,9 @@ df['Price Change in 1 Day'] = one_day
 df.to_excel(file_path, index=False)
 
 df['Price Change in 7 Days'] = seven_days
+df.to_excel(file_path, index=False)
+
+df['Price Change in 1 Month'] = one_month
 df.to_excel(file_path, index=False)
 
 driver.quit()
