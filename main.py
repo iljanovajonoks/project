@@ -36,6 +36,7 @@ df.to_excel(file_path, index=False)
 current_price = []
 one_day = []
 seven_days = []
+one_month = []
 
 for row in portfolio:
 
@@ -73,11 +74,9 @@ for row in portfolio:
         one_day.append(f'+{find.text}'.replace(" (1d)", ""))
 
     # Paņemu cenas izmaiņu par 7 dienām.
-    li_element = WebDriverWait(driver, 1).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, '.react-tabs__tab-list li:nth-child(2)'))
-    )
+    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, "//li[text()='7D']")))
 
-    li_element.click()
+    find.click()
     time.sleep(1)
     find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.fwNMDM')))
 
@@ -87,24 +86,41 @@ for row in portfolio:
         find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
         seven_days.append(f'+{find.text}'.replace(" (7d)", ""))
 
+    # Paņemu cenas izmaiņu par 1 menēsi.
+    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.XPATH, "//li[text()='1M']")))
+
+    find.click()
+    time.sleep(1)
+    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.fwNMDM')))
+
+    if "(1mo)" in find.text:
+        one_month.append(f'-{find.text}'.replace(" (1mo)", ""))
+    else:
+        find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
+        one_month.append(f'+{find.text}'.replace(" (1mo)", ""))
+
 # Visu datu izvadīšana excel failā.
 df['Current Price, $'] = current_price
 df.to_excel(file_path, index=False)
 
 # Peļņas vai zaudējumu aprēķins no pirkuma cenas izmaiņām, procentos.
 profit_loss = []
+i = 0
 for row in portfolio:
-    temp = ((row[5] - row[3]) / row[3]) * 100
+    temp = ((current_price[i] - row[3]) / row[3]) * 100
     profit_loss.append(round(temp, 2))
+    i += 1
 
 df['Profit / Loss, %'] = profit_loss
 df.to_excel(file_path, index=False)
 
 # Pašreizējais investīciju apjoms.
 current_invest_amount = []
+i = 0
 for row in portfolio:
-    temp = (row[2] * row[5])
+    temp = (row[2] * current_price[i])
     current_invest_amount.append(round(temp, 2))
+    i += 1
 
 df['Current Invested Amount, $'] = current_invest_amount
 df.to_excel(file_path, index=False)
@@ -113,6 +129,9 @@ df['Price Change in 1 Day'] = one_day
 df.to_excel(file_path, index=False)
 
 df['Price Change in 7 Days'] = seven_days
+df.to_excel(file_path, index=False)
+
+df['Price Change in 1 Month'] = one_month
 df.to_excel(file_path, index=False)
 
 driver.quit()
