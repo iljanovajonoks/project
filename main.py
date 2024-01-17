@@ -19,8 +19,8 @@ driver.get(url)
 find = WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.ID, "onetrust-accept-btn-handler")))
 find.click()
 
-# Excel atveršana ar portfeļa datiem
-file_path = "portfolio2.xlsx"
+# Excel atveršana ar portfeļa datiem.
+file_path = "portfolio.xlsx"
 df = pandas.read_excel(file_path)
 portfolio = df.values.tolist()
 
@@ -36,7 +36,6 @@ df.to_excel(file_path, index=False)
 current_price = []
 one_day = []
 seven_days = []
-one_month = []
 
 for row in portfolio:
 
@@ -73,7 +72,7 @@ for row in portfolio:
         find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
         one_day.append(f'+{find.text}'.replace(" (1d)", ""))
 
-    # Paņemu cenas izmaiņu par 7 dienas.
+    # Paņemu cenas izmaiņu par 7 dienām.
     li_element = WebDriverWait(driver, 1).until(
         EC.visibility_of_element_located((By.CSS_SELECTOR, '.react-tabs__tab-list li:nth-child(2)'))
     )
@@ -88,21 +87,7 @@ for row in portfolio:
         find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
         seven_days.append(f'+{find.text}'.replace(" (7d)", ""))
 
-    # Paņemu cenas izmaiņu par 1 menesi.
-    li_element = WebDriverWait(driver, 1).until(
-        EC.visibility_of_element_located((By.CSS_SELECTOR, '.react-tabs__tab-list li:nth-child(3)'))
-    )
-
-    li_element.click()
-    time.sleep(1)
-    find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.fwNMDM')))
-
-    if "(1mo)" in find.text:
-        one_month.append(f'-{find.text}'.replace(" (1mo)", ""))
-    else:
-        find = WebDriverWait(driver, 1).until(EC.visibility_of_element_located((By.CLASS_NAME, 'sc-4984dd93-0.sc-58c82cf9-1.heXOji')))
-        one_month.append(f'+{find.text}'.replace(" (1mo)", ""))
-
+# Visu datu izvadīšana excel failā.
 df['Current Price, $'] = current_price
 df.to_excel(file_path, index=False)
 
@@ -128,9 +113,6 @@ df['Price Change in 1 Day'] = one_day
 df.to_excel(file_path, index=False)
 
 df['Price Change in 7 Days'] = seven_days
-df.to_excel(file_path, index=False)
-
-df['Price Change in 1 Month'] = one_month
 df.to_excel(file_path, index=False)
 
 driver.quit()
